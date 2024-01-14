@@ -1,27 +1,47 @@
+import os
+from langchain.chat_models import ChatOpenAI
+from langchain.memory import ConversationBufferMemory
+from langchain.agents import (
+    load_tools,
+    initialize_agent,
+    AgentType
+)
+import langchain
 import gradio as gr
-from langchain.callbacks.manager import CallbackManager
-from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
-from langchain.prompts import PromptTemplate
-from langchain_community.llms import LlamaCpp
-from langchain.schema import AIMessage, HumanMessage
+import matplotlib
+from dotenv import load_dotenv
 
 
-template = """Question: {question}
+load_dotenv('../.env')
+matplotlib.use('TkAgg')
 
-Answer: Let's work this out in a step by step way to be sure we have the right answer."""
-# Callbacks support token-wise streaming
-callback_manager = CallbackManager([StreamingStdOutCallbackHandler()])
+langchain.debug = True
+os.environ['OPENAI_API_KEY'] = os.getenv('OPENAI_API_KEY')
+chat = ChatOpenAI(temperature=0.0, model_name="gpt-3.5-turbo", verbose=True)
 
-prompt = PromptTemplate(template=template, input_variables=["question"])
-model_path = "../models/openchat_3.5.Q4_K_M.gguf"
-llm = LlamaCpp(
-    model_path=model_path,
-    temperature=0.0,
-    max_tokens=2190,
-    top_p=1,
-    callback_manager=callback_manager,
-    verbose=True,  # Verbose is required to pass to the callback manager
+tools = load_tools([], llm=chat)
+memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
+agent = initialize_agent(
+    tools,
+    chat,
+    agent=AgentType.CHAT_CONVERSATIONAL_REACT_DESCRIPTION,
+    verbose=True,
+    handle_parsing_errors="Check your output and make sure it conforms!",
+    memory=memory
 )
 
 
+def call_agent(user_question):
+    response = agent.run(input=user_question)
+    return response
 
+
+with gr.Blocks() as demo:
+    title = gr.HTML("<h1>mememmemememememe</h1>")
+    input = gr.Textbox(label="Че хочешь узнать про мемы?")
+    output = gr.Textbox(label="Держи ответ братишка")
+    btn = gr.Button("ЧЕ????")
+    btn.click(fn=call_agent, inputs=input, outputs=output)
+
+
+demo.launch(share=True, debug=True)
