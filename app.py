@@ -1,45 +1,47 @@
-from langchain.document_loaders import PyPDFDirectoryLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.embeddings.openai import OpenAIEmbeddings
-from langchain.vectorstores import Pinecone
-from langchain.chains.question_answering import load_qa_chain
-from langchain.llms import OpenAI
-from dotenv import load_dotenv
-import pinecone
-import gradio as gr
 import os
+from langchain.chat_models import ChatOpenAI
+from langchain.memory import ConversationBufferMemory
+from langchain.agents import (
+    load_tools,
+    initialize_agent,
+    AgentType
+)
+import langchain
+import gradio as gr
+import matplotlib
+from dotenv import load_dotenv
 
 
+load_dotenv('../.env')
+matplotlib.use('TkAgg')
+
+langchain.debug = True
+os.environ['OPENAI_API_KEY'] = os.getenv('OPENAI_API_KEY')
+chat = ChatOpenAI(temperature=0.0, model_name="gpt-3.5-turbo", verbose=True)
+
+tools = load_tools([], llm=chat)
+memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
+agent = initialize_agent(
+    tools,
+    chat,
+    agent=AgentType.CHAT_CONVERSATIONAL_REACT_DESCRIPTION,
+    verbose=True,
+    handle_parsing_errors="Check your output and make sure it conforms!",
+    memory=memory
+)
 
 
-
-
-def read_doc(directory: str):
-    file_loader = PyPDFDirectoryLoader(directory)
-    documents = file_loader.load()
-    return documents
-
-
-def chunk_data(docs, chunk_size=800, chunk_overlap=50):
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
-    chunks = text_splitter.split_documents(docs)
-    return chunks
-
-
-def retrieve_query(index, query, k=2):
-    matching_results = index.similarity_search(query, k=k)
-    return matching_results
-
-
-def retrieve_answers(index, chain, query):
-    doc_search = retrieve_query(index, query)
-    response = chain.run(input_documents=doc_search, question=query)
+def call_agent(user_question):
+    response = agent.run(input=user_question)
     return response
 
 
-def qa_manager(query):
-    return retrieve_answers(query)
+with gr.Blocks() as demo:
+    title = gr.HTML("<h1>mememmemememememe</h1>")
+    input = gr.Textbox(label="Че хочешь узнать про мемы?")
+    output = gr.Textbox(label="Держи ответ братишка")
+    btn = gr.Button("ЧЕ????")
+    btn.click(fn=call_agent, inputs=input, outputs=output)
 
 
-
-
+demo.launch(share=True, debug=True)
