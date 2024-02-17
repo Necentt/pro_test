@@ -1,5 +1,5 @@
 import gradio as gr
-import matplotlib
+# import matplotlib
 from langchain_core.prompts import ChatPromptTemplate
 from langchain.vectorstores.chroma import Chroma
 from langchain.embeddings import OpenAIEmbeddings
@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 
 
 load_dotenv('../.env')
-matplotlib.use('TkAgg')
+# matplotlib.use('TkAgg')
 openai_api_key = os.getenv('OPENAI_API_KEY')
 chat = ChatOpenAI(
     openai_api_key=openai_api_key,
