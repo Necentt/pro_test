@@ -6,7 +6,7 @@
 ### Technologies Used
 
 - **Programming Language:** Python
-- **Application for  LLM** [langchain](https://www.langchain.com/)
+- **Application for  LLM:** [langchain](https://www.langchain.com/)
 - **Vector database:** [Chroma DB](https://www.trychroma.com/)
 - **Text Generation:** [OpenAI GPT API](https://openai.com/product)
 - **Demo UI:** [gradio](https://www.gradio.app/) 
