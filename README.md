@@ -1,5 +1,5 @@
 ## General info
-**Title:** ProAI
+**Title:** RAG memes(russian)
 
 **Main idea:** use a RAG and a text document to give context to the message
 
@@ -12,7 +12,7 @@
 - **Demo UI:** [gradio](https://www.gradio.app/) 
 
 
-The project was completed as part of the ProAI test assignment
+The project is designed as an educational project.
 ## Repo structure
 
 * folder `data` - vectorized data 
